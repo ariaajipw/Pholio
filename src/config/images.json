@@ -1,0 +1,23 @@
+{
+  "mapping": {
+    "previews01.jpeg": "previews01",
+    "previews02.jpeg": "previews02",
+    "previews03.jpeg": "previews03",
+    "previews04.jpeg": "previews04",
+    "previews05.jpeg": "previews05",
+    "previews06.jpeg": "previews06",
+    "previews07.jpeg": "previews07",
+    "previews08.jpeg": "previews08",
+    "previews09.jpeg": "previews09",
+    "previews10.jpeg": "previews10",
+    "previews11.jpeg": "previews11",
+    "previews12.jpeg": "previews12",
+    "previews13.jpeg": "previews13",
+    "previews14.jpeg": "previews14",
+    "previews15.jpeg": "previews15"
+  },
+  "fallback": {
+    "useSourceName": true,
+    "addSuffix": "-wm"
+  }
+}

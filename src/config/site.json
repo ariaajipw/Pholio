@@ -1,0 +1,39 @@
+{
+  "name": "Pholio",
+  "tagline": "Portfolio Fotografi & Katalog",
+  "photographer": "Rajipo",
+  "locale": "id-ID",
+  "baseUrl": "",
+  "theme": {
+    "preset": "bold"
+  },
+  "hero": {
+    "variant": "stagger"
+  },
+  "header": {
+    "variant": "split-nav"
+  },
+  "gallery": {
+    "views": ["grid"]
+  },
+  "features": {
+    "filter": true,
+    "lightbox": true,
+    "gridLines": true,
+    "whatsappFloating": true,
+    "entranceMotion": false
+  },
+  "contact": {
+    "email": "hello@example.com",
+    "whatsapp": "6281234567890",
+    "instagram": "@username",
+    "location": "Jakarta, Indonesia"
+  },
+  "social": [],
+  "navigation": [
+    { "label": "Galeri", "href": "/gallery" },
+    { "label": "Toko", "href": "/shop" },
+    { "label": "Tentang", "href": "/about" },
+    { "label": "Kontak", "href": "/contact" }
+  ]
+}

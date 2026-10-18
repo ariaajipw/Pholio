@@ -1,0 +1,363 @@
+@import "tailwindcss";
+
+@theme {
+  /* Editorial preset (alternatif) */
+  --color-bg: #F3F3F1;
+  --color-surface: #FFFFFF;
+  --color-text: #0A0B10;
+  --color-muted: #62625E;
+  --color-border: #D9D9D5;
+  --color-brand: #0A0B10;
+  --color-on-brand: #FFFFFF;
+  --color-focus: #1D5FCC;
+  --color-whatsapp: #167D48;
+  --color-grid-line: rgb(10 11 16 / 0.08);
+  --color-scrim: rgb(0 0 0 / 0.55);
+}
+
+/* Bold preset variant */
+:root[data-theme-preset="bold"] {
+  --color-bg: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-text: #1B1111;
+  --color-muted: #6A6060;
+  --color-border: #EBC9C9;
+  --color-brand: #D40000;
+  --color-on-brand: #FFFFFF;
+  --color-focus: #1D5FCC;
+  --color-whatsapp: #167D48;
+  --color-grid-line: rgb(212 0 0 / 0.22);
+  --color-scrim: rgb(0 0 0 / 0.55);
+}
+
+/* Compatibility with v1 tokens */
+:root {
+  --color-accent: var(--color-brand);
+  --color-on-accent: var(--color-on-brand);
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+/* Skip link for accessibility */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.5rem;
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+  text-decoration: none;
+  border-radius: 0.25rem;
+  z-index: 10000;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Grid lines component (Bold preset, desktop only) */
+.grid-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-grid-line) 0 1px,
+    transparent 1px calc(100% / 6)
+  );
+}
+
+@media (max-width: 1023px) {
+  .grid-lines {
+    display: none;
+  }
+}
+
+/* Scrim gradient for captions on images */
+.scrim-gradient {
+  background: linear-gradient(to top, var(--color-scrim), transparent 55%);
+}
+
+/* Container utility */
+.container {
+  width: min(100% - 2 * var(--gutter), 1600px);
+  margin-inline: auto;
+  --gutter: clamp(16px, 3vw, 48px);
+}
+
+/* ------------------------------------------------------------------
+   Typography — kontras skala yang disengaja: display besar, section
+   tegas, body rapi, caption kecil. Bukan sekadar memperbesar semua.
+------------------------------------------------------------------- */
+
+.text-display-overlap {
+  font-size: clamp(4rem, 18vw, 16rem);
+  line-height: 0.85;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.text-display-stagger {
+  font-size: clamp(2.75rem, 6vw, 6.5rem);
+  line-height: 0.96;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+}
+
+.text-heading-page {
+  font-size: clamp(2.25rem, 4.5vw, 4.25rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.text-heading-section {
+  font-size: clamp(1.75rem, 2.8vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.text-body {
+  font-size: clamp(1rem, 1.2vw, 1.125rem);
+  line-height: 1.7;
+  max-width: 68ch;
+}
+
+.text-caption {
+  font-size: clamp(0.8125rem, 1.1vw, 0.875rem);
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.text-nav-filter {
+  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ------------------------------------------------------------------
+   Buttons — satu sistem, dua gaya per preset.
+   .btn-primary / .btn-secondary dipilih oleh komponen; gaya mengikuti
+   data-theme-preset pada <html>. Class lama tetap berfungsi sebagai
+   alias agar tidak ada halaman yang tertinggal.
+------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 0;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+/* Disabled (demo) button state — non-interactive, clearly marked */
+.btn--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Primary + Secondary — dasar Editorial */
+.btn-primary,
+.btn-primary-editorial,
+.btn-hard {
+  background-color: var(--color-brand);
+  color: var(--color-on-brand);
+  transition: transform 120ms, box-shadow 120ms, opacity 120ms;
+}
+
+.btn-primary:hover,
+.btn-primary-editorial:hover,
+.btn-hard:hover {
+  opacity: 0.9;
+}
+
+.btn-primary:active,
+.btn-primary-editorial:active,
+.btn-hard:active {
+  opacity: 1;
+  transform: scale(0.98);
+}
+
+.btn-secondary,
+.btn-secondary-editorial {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  transition: opacity 120ms;
+}
+
+.btn-secondary:hover,
+.btn-secondary-editorial:hover {
+  opacity: 0.7;
+}
+
+/* Gaya Bold: outline tebal + bayangan keras (DESIGN §7.4) */
+:root[data-theme-preset="bold"] .btn-primary,
+:root[data-theme-preset="bold"] .btn-primary-editorial,
+:root[data-theme-preset="bold"] .btn-hard {
+  border: 2px solid var(--color-brand);
+  background: var(--color-bg);
+  color: var(--color-brand);
+  box-shadow: 4px 4px 0 var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  opacity: 1;
+}
+
+:root[data-theme-preset="bold"] .btn-primary:hover,
+:root[data-theme-preset="bold"] .btn-primary-editorial:hover,
+:root[data-theme-preset="bold"] .btn-hard:hover {
+  opacity: 1;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--color-brand);
+}
+
+:root[data-theme-preset="bold"] .btn-primary:active,
+:root[data-theme-preset="bold"] .btn-primary-editorial:active,
+:root[data-theme-preset="bold"] .btn-hard:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--color-brand);
+}
+
+/* WhatsApp floating button */
+.whatsapp-float {
+  position: fixed;
+  bottom: max(1.5rem, env(safe-area-inset-bottom));
+  right: max(1.5rem, env(safe-area-inset-right));
+  z-index: 100;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-whatsapp);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+  transition: transform 120ms, box-shadow 120ms;
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.whatsapp-float:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+.whatsapp-float svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Hide floating WhatsApp on product pages where sticky CTA bar is used */
+@media (max-width: 767px) {
+  .has-sticky-cta .whatsapp-float {
+    display: none;
+  }
+}
+
+/* Ruang ekstra di dasar halaman foto agar tombol melayang tidak
+   menutupi kartu foto saat halaman digulir penuh (DESIGN §7.8) */
+.wa-safe-bottom {
+  padding-bottom: 5rem;
+}
+
+/* Image utilities */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Bingkai foto bersama: fallback di belakang, foto menutupi frame.
+   .photo-fit menampilkan foto utuh (contain) tanpa crop. */
+.photo-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-border);
+}
+
+.photo-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-frame.photo-fit img {
+  object-fit: contain;
+  background: var(--color-surface);
+}
+
+.photo-frame .frame-fallback {
+  position: absolute;
+  inset: 0;
+}
+
+/* Lightbox open state (component styles live in Lightbox.astro) */
+body.lightbox-open {
+  overflow: hidden;
+}
+
+/* Hide other fixed elements while the lightbox is open (DESIGN §7.7) */
+body.lightbox-open .whatsapp-float {
+  display: none;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

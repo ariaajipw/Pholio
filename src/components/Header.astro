@@ -1,0 +1,231 @@
+---
+/**
+ * Header component with two variants:
+ * - centered-wordmark (default Editorial): three zones - left link, center name, right link
+ * - split-nav (default Bold): logo left, nav center, featured button right
+ */
+import { getSiteConfig } from '../config/site';
+
+const config = getSiteConfig();
+const { header, navigation, photographer } = config;
+
+const isCenteredWordmark = header.variant === 'centered-wordmark';
+const isSplitNav = header.variant === 'split-nav';
+
+// Current path for active-link marking (no color-only indication, DESIGN §7.1)
+const currentPath = (Astro.url?.pathname || '').replace(/\/+$/, '') || '/';
+const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href));
+---
+
+<header class={isSplitNav ? 'header header--split' : 'header'} role="banner">
+  <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+  <div class="container header-inner">
+    {isCenteredWordmark && (
+      <>
+        <!-- Left zone -->
+        <nav class="header-zone header-zone--left" aria-label="Navigasi utama kiri">
+          <a
+            href={navigation[0]?.href || '/gallery'}
+            class="header-link"
+            aria-current={isActive(navigation[0]?.href || '/gallery') ? 'page' : undefined}
+          >
+            {navigation[0]?.label || 'Galeri'}
+          </a>
+        </nav>
+
+        <!-- Center zone - Wordmark -->
+        <div class="header-zone header-zone--center">
+          <a href="/" class="header-wordmark" aria-label={`${photographer} - Beranda`}>
+            {photographer}
+          </a>
+        </div>
+
+        <!-- Right zone -->
+        <nav class="header-zone header-zone--right" aria-label="Navigasi utama kanan">
+          <a
+            href={navigation[1]?.href || '/shop'}
+            class="header-link header-link--featured"
+            aria-current={isActive(navigation[1]?.href || '/shop') ? 'page' : undefined}
+          >
+            {navigation[1]?.label || 'Toko'}
+          </a>
+        </nav>
+      </>
+    )}
+
+    {isSplitNav && (
+      <>
+        <!-- Left - Logo/Name -->
+        <div class="header-zone header-zone--left">
+          <a href="/" class="header-wordmark" aria-label={`${photographer} - Beranda`}>
+            {photographer}
+          </a>
+        </div>
+
+        <!-- Center - Navigation -->
+        <nav class="header-zone header-zone--center" aria-label="Navigasi utama">
+          <ul class="header-nav-list" role="list">
+            {navigation.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class={`header-nav-link${isActive(item.href) ? ' header-nav-link--active' : ''}${item.featured ? ' header-nav-link--featured' : ''}`}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <!-- Right - Featured action -->
+        <div class="header-zone header-zone--right">
+          <a href={navigation[1]?.href || '/shop'} class="btn btn-primary header-cta">
+            {navigation[1]?.label || 'Toko'}
+          </a>
+        </div>
+      </>
+    )}
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1rem 0;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .header-zone {
+    display: flex;
+    align-items: center;
+  }
+
+  .header-zone--center {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .header-zone--right {
+    justify-content: flex-end;
+  }
+
+  .header-wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    font-weight: 800;
+    text-decoration: none;
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .header-wordmark:hover {
+    opacity: 0.7;
+  }
+
+  .header-link,
+  .header-nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: clamp(0.8125rem, 1vw, 0.9375rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    color: var(--color-text);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0;
+    transition: opacity 120ms;
+  }
+
+  .header-link:hover,
+  .header-nav-link:hover {
+    opacity: 0.6;
+  }
+
+  .header-link--featured,
+  .header-nav-link--featured {
+    color: var(--color-brand);
+  }
+
+  /* Active link: underline + weight, not color alone (DESIGN §7.1) */
+  .header-link[aria-current="page"],
+  .header-nav-link--active {
+    text-decoration: underline;
+    text-underline-offset: 0.35em;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--color-brand);
+  }
+
+  .header-nav-list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (max-width: 767px) {
+    .header-inner {
+      gap: 1rem;
+    }
+
+    .header-nav-list {
+      gap: 0.25rem;
+    }
+
+    .header-nav-link {
+      padding: 0.5rem 0.625rem;
+      font-size: 0.75rem;
+    }
+
+    .header-wordmark {
+      font-size: 1rem;
+    }
+
+    /* Split nav: wrap the link row below the wordmark and CTA so the
+       header fits 360px without horizontal scroll (DESIGN §7.1). */
+    .header--split .header-inner {
+      flex-wrap: wrap;
+      row-gap: 0.5rem;
+    }
+
+    .header--split .header-zone--center {
+      order: 3;
+      flex: 1 1 100%;
+      justify-content: flex-start;
+    }
+
+    .header--split .header-nav-list {
+      flex-wrap: wrap;
+      row-gap: 0.25rem;
+    }
+  }
+
+  /* Centered wordmark variant - three equal zones */
+  .header:has(.header-zone--left):has(.header-zone--center):has(.header-zone--right) {
+    /* Three zone layout */
+  }
+
+  .header-zone--left,
+  .header-zone--right {
+    min-width: 80px;
+  }
+</style>

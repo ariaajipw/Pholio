@@ -1,0 +1,71 @@
+---
+/**
+ * Base layout with Header, Footer, and global styles
+ */
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import SEO from '../components/SEO.astro';
+import { getSiteConfig } from '../config/site';
+import '../styles/global.css';
+
+const config = getSiteConfig();
+const themePreset = config.theme.preset;
+---
+
+<!DOCTYPE html>
+<html lang={config.locale} data-theme-preset={themePreset}>
+  <head>
+    <meta charset="utf-8" />
+    <SEO {...Astro.props} />
+  </head>
+  <body class="page-body">
+    <Header />
+    <main id="main-content" class="main-content">
+      <slot />
+    </main>
+    <Footer />
+    {config.features.whatsappFloating && config.contact.whatsapp && (
+      <a
+        href={`https://wa.me/${config.contact.whatsapp}?text=${encodeURIComponent('Halo, saya ingin bertanya tentang portofolio dan layanan Anda.')}`}
+        class="whatsapp-float"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat WhatsApp"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      </a>
+    )}
+  </body>
+</html>
+
+<style>
+  .page-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .main-content {
+    flex: 1;
+    width: 100%;
+  }
+</style>
+
+<script>
+  // Sembunyikan tombol WhatsApp melayang saat footer terlihat agar tidak
+  // menutupi konten footer (DESIGN §7.8). IntersectionObserver, tanpa
+  // dependency; elemen tetap tersedia bila observer tidak didukung.
+  const float = document.querySelector<HTMLElement>('.whatsapp-float');
+  const footer = document.querySelector('.footer');
+  if (float && footer && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        float.hidden = entries[0].isIntersecting;
+      },
+      { rootMargin: '0px 0px -24px 0px' }
+    );
+    observer.observe(footer);
+  }
+</script>

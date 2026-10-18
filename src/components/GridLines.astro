@@ -1,0 +1,21 @@
+---
+/**
+ * GridLines — decorative hairline grid (Gogoko-inspired).
+ *
+ * Rendered only when BOTH hold:
+ *   - `features.gridLines` is enabled in site config
+ *   - the theme preset supports it (`bold`, per DESIGN.md §5.3)
+ *
+ * Purely decorative: aria-hidden, pointer-events: none, sits behind
+ * content. Hidden below 1024px (see `.grid-lines` in global.css).
+ *
+ * Place inside a `position: relative` container and keep page content
+ * above it (position/z-index), e.g. `.hero-inner { z-index: 1 }`.
+ */
+import { getSiteConfig } from '../config/site';
+
+const config = getSiteConfig();
+const show = config.features.gridLines && config.theme.preset === 'bold';
+---
+
+{show && <div class="grid-lines" aria-hidden="true"></div>}

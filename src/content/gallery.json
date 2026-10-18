@@ -1,0 +1,53 @@
+[
+  {
+    "id": "bromo-sunrise",
+    "title": "Lanskap Pegunungan Saat Matahari Terbit",
+    "category": "landscape",
+    "src": "/images/previews/previews01.webp",
+    "alt": "Lanskap pegunungan dengan warna hangat matahari terbit dan kabut pagi",
+    "featured": true,
+    "productId": "bromo-sunrise-license"
+  },
+  {
+    "id": "portrait-studio-1",
+    "title": "Potret Studio High-Key",
+    "category": "portrait",
+    "src": "/images/previews/previews09.webp",
+    "alt": "Potret wajah dengan pencahayaan studio high-key cerah",
+    "featured": true,
+    "productId": "portrait-session-basic"
+  },
+  {
+    "id": "landscape-mountain-1",
+    "title": "Silhouette Pegunungan Biru",
+    "category": "landscape",
+    "src": "/images/previews/previews12.webp",
+    "alt": "Silhouette pegunungan dengan langit biru dan awan",
+    "featured": false,
+    "productId": "landscape-print-a3"
+  },
+  {
+    "id": "street-photo-1",
+    "title": "Jalanan Kota di Hora Emas",
+    "category": "street",
+    "src": "/images/previews/previews04.webp",
+    "alt": "Komposisi jalanan kota dengan pencahayaan hangat sore hari",
+    "featured": false
+  },
+  {
+    "id": "event-wedding-1",
+    "title": "Acara Pernikahan Cerah",
+    "category": "event",
+    "src": "/images/previews/previews05.webp",
+    "alt": "Momen pernikahan dengan pencahayaan cerah dan suasana meriah",
+    "featured": true
+  },
+  {
+    "id": "fashion-editorial-1",
+    "title": "Fashion Editorial Merah",
+    "category": "fashion",
+    "src": "/images/previews/previews07.webp",
+    "alt": "Model dengan busana berwarna merah dominan di latar studio",
+    "featured": false
+  }
+]

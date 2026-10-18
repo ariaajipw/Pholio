@@ -1,0 +1,261 @@
+---
+/**
+ * Contact page - contact information and WhatsApp CTA
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSiteConfig } from '../config/site';
+import { buildWhatsAppInquiryUrl } from '../lib/wa-formatter';
+
+const config = getSiteConfig();
+const { photographer, contact, social } = config;
+const whatsappUrl = contact.whatsapp
+  ? buildWhatsAppInquiryUrl(contact.whatsapp, 'Halo, saya ingin bertanya tentang portofolio dan layanan Anda.')
+  : '#';
+---
+
+<BaseLayout title="Kontak" description={`Kontak ${photographer} - ${config.tagline}`}>
+  <section class="contact-page" aria-labelledby="contact-title">
+    <div class="container">
+      <header class="page-header">
+        <h1 id="contact-title" class="text-heading-page">Kontak</h1>
+        <p class="text-caption">Hubungi kami untuk pertanyaan, kolaborasi, atau pemesanan</p>
+      </header>
+
+      <div class="contact-content">
+        <div class="contact-main">
+          <div class="contact-method">
+            <h2 class="text-heading-section">WhatsApp</h2>
+            <p class="text-body">Cara tercepat untuk menghubungi kami. Klik tombol di bawah untuk memulai percakapan.</p>
+            {contact.whatsapp && (
+              <a
+                href={whatsappUrl}
+                class="btn btn-primary whatsapp-main-btn"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                Chat via WhatsApp
+              </a>
+            )}
+          </div>
+
+          <div class="contact-method">
+            <h2 class="text-heading-section">Email</h2>
+            <p class="text-body">Untuk pertanyaan formal, proposal, atau dokumen yang memerlukan lampiran.</p>
+            {contact.email && (
+              <a href={`mailto:${contact.email}`} class="btn btn-secondary">
+                Kirim Email
+              </a>
+            )}
+          </div>
+
+          <div class="contact-method">
+            <h2 class="text-heading-section">Media Sosial</h2>
+            <p class="text-body">Ikuti dan hubungi kami melalui platform sosial.</p>
+            <div class="social-links">
+              {social.length > 0 ? (
+                social.map((item) => (
+                  <a href={item.url} target="_blank" rel="noopener noreferrer" class="social-link">
+                    {item.icon}
+                    <span>{item.name}</span>
+                  </a>
+                ))
+              ) : contact.instagram && (
+                <a href={`https://instagram.com/${(contact.instagram || '').replace('@', '')}`} target="_blank" rel="noopener noreferrer" class="social-link">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                  </svg>
+                  <span>Instagram</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-info">
+          <h2 class="text-heading-section">Informasi</h2>
+          <dl class="contact-details">
+            <div>
+              <dt>Nama</dt>
+              <dd>{photographer}</dd>
+            </div>
+            {contact.location && (
+              <div>
+                <dt>Lokasi</dt>
+                <dd>{contact.location}</dd>
+              </div>
+            )}
+            {contact.email && (
+              <div>
+                <dt>Email</dt>
+                <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+              </div>
+            )}
+            {contact.whatsapp && (
+              <div>
+                <dt>WhatsApp</dt>
+                <dd><a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer">{contact.whatsapp}</a></dd>
+              </div>
+            )}
+          </dl>
+
+          <div class="contact-note">
+            <h3>Jam Operasional</h3>
+            <p class="text-body">Senin–Jumat: 09:00–18:00 WIB<br />Sabtu: 09:00–14:00 WIB<br />Minggu: Tutup</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact-page {
+    padding: 4rem 0 6rem;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .contact-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .contact-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .contact-method {
+    padding: 2rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+  }
+
+  .contact-method h2 {
+    margin: 0 0 0.75rem;
+  }
+
+  .contact-method .text-body {
+    margin: 0 0 1.5rem;
+    color: var(--color-muted);
+  }
+
+  .whatsapp-main-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    transition: all 120ms;
+  }
+
+  .social-link:hover {
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+  }
+
+  .contact-info {
+    padding: 2rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+  }
+
+  .contact-info h2 {
+    margin: 0 0 1.5rem;
+  }
+
+  .contact-details {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .contact-details div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .contact-details dt {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+  }
+
+  .contact-details dd {
+    font-size: 0.9375rem;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .contact-details a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: none;
+    transition: color 120ms;
+  }
+
+  .contact-details a:hover {
+    color: var(--color-brand);
+  }
+
+  .contact-note {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .contact-note h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+  }
+
+  .contact-note p {
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    .contact-content {
+      grid-template-columns: 2fr 1fr;
+    }
+
+    .contact-main {
+      gap: 2rem;
+    }
+  }
+</style>

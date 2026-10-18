@@ -1,0 +1,50 @@
+[
+  {
+    "id": "bromo-sunrise-license",
+    "type": "digital",
+    "title": "Lanskap Pegunungan Sunrise — Lisensi Personal",
+    "category": "landscape",
+    "description": "Foto lanskap pegunungan saat matahari terbit untuk penggunaan personal sesuai ketentuan lisensi. File digital resolusi tinggi akan dikirimkan setelah pembayaran terverifikasi.",
+    "price": 350000,
+    "currency": "IDR",
+    "preview": "/images/previews/previews01.webp",
+    "checkout": {
+      "provider": "mayar",
+      "url": "https://example.invalid/payment-link"
+    },
+    "licenseLabel": "Lisensi personal",
+    "featured": true
+  },
+  {
+    "id": "portrait-session-basic",
+    "type": "physical",
+    "title": "Sesi Potret Studio — 1 Jam",
+    "category": "portrait",
+    "description": "Sesi foto potret 1 jam di studio dengan pencahayaan professional. Termasuk 10 foto terpilih beresolusi tinggi dikirim via link download setelah sesi.",
+    "price": 1500000,
+    "currency": "IDR",
+    "preview": "/images/previews/previews09.webp",
+    "checkout": {
+      "provider": "whatsapp",
+      "url": ""
+    },
+    "licenseLabel": "Hak gunakan personal",
+    "featured": true
+  },
+  {
+    "id": "landscape-print-a3",
+    "type": "physical",
+    "title": "Cetak Fine Art A3 — Lanskap Pegunungan",
+    "category": "landscape",
+    "description": "Cetak fine art kualitas museum ukuran A3 (297 x 420 mm) pada kertas premium. Gambar: silhouette pegunungan dengan langit biru. Termasuk sertifikat keaslian.",
+    "price": 750000,
+    "currency": "IDR",
+    "preview": "/images/previews/previews12.webp",
+    "checkout": {
+      "provider": "whatsapp",
+      "url": ""
+    },
+    "licenseLabel": "Cetak fisik terbatas",
+    "featured": false
+  }
+]

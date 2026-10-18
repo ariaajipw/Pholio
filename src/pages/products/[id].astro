@@ -1,0 +1,370 @@
+---
+/**
+ * Product detail page - static generation per product
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSiteConfig } from '../../config/site';
+import { formatPrice } from '../../lib/format-price';
+import { buildWhatsAppProductUrl } from '../../lib/wa-formatter';
+import { hasPublicAsset } from '../../lib/has-public-asset';
+import productsData from '../../content/products.json';
+
+const config = getSiteConfig();
+const { contact } = config;
+
+// Get all product IDs for static generation
+export async function getStaticPaths() {
+  return productsData.map((product: any) => ({
+    params: { id: product.id },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props;
+const pageTitle = product.title;
+const pageDescription = product.description;
+const productUrl = Astro.url?.href;
+
+// Demo checkout URLs (example.invalid) must not navigate users to a dead
+// domain. Mark them "belum tersedia" until a real, verified URL is set.
+const isPlaceholderCheckout = /example\.invalid/i.test(product.checkout?.url || '');
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={`/products/${product.id}`}>
+  <section class="product-page wa-safe-bottom" aria-labelledby="product-title">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol role="list">
+          <li><a href="/">Beranda</a></li>
+          <li><a href="/shop">Katalog</a></li>
+          <li aria-current="page">{product.title}</li>
+        </ol>
+      </nav>
+
+      <div class="product-layout">
+        <!-- Product Image -->
+        <div class="product-gallery">
+          <div class="photo-frame photo-fit product-main-image">
+            <div class="frame-fallback" aria-hidden="true">
+              <svg viewBox="0 0 800 600" fill="none" aria-hidden="true">
+                <rect width="800" height="600" fill="var(--color-border)"/>
+                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="var(--color-muted)" font-size="20" font-family="system-ui">{product.title}</text>
+              </svg>
+            </div>
+            {hasPublicAsset(product.preview) && (
+              <img
+                src={product.preview}
+                alt={product.title}
+                decoding="async"
+              />
+            )}
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info-panel" id="product-info">
+          <div class="product-meta">
+            <span class="product-type-badge">{product.type === 'digital' ? 'Produk Digital' : 'Produk Fisik'}</span>
+            <span class="product-category">{product.category}</span>
+          </div>
+
+          <h1 id="product-title" class="product-title">{product.title}</h1>
+
+          <p class="product-price-large">{formatPrice(product.price, { currency: product.currency })}</p>
+
+          {product.licenseLabel && (
+            <p class="product-license-label">{product.licenseLabel}</p>
+          )}
+
+          <div class="product-description text-body">
+            {product.description}
+          </div>
+
+          <div class="product-cta-group">
+            {product.checkout.provider !== 'whatsapp' && product.checkout.url && (
+              isPlaceholderCheckout ? (
+                <span class="btn btn-primary btn--disabled" aria-disabled="true">
+                  Checkout belum tersedia
+                </span>
+              ) : (
+                <a
+                  href={product.checkout.url}
+                  class="btn btn-primary"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {product.type === 'digital' ? 'Beli Foto' : 'Pesan Sekarang'} &rarr;
+                </a>
+              )
+            )}
+
+            {contact.whatsapp && (
+              <a
+                href={buildWhatsAppProductUrl(
+                  contact.whatsapp,
+                  product.title,
+                  formatPrice(product.price, { currency: product.currency }),
+                  productUrl
+                )}
+                class="btn btn-secondary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Tanya via WhatsApp
+              </a>
+            )}
+          </div>
+
+          <div class="product-notice">
+            <p class="text-caption">
+              <strong>Catatan:</strong> Website ini mengarahkan ke checkout eksternal.
+              Pembayaran dan pengiriman dikelola oleh penyedia layanan pembayaran.
+              {isPlaceholderCheckout && (
+                <> Tautan checkout demo ini belum tersedia dan akan diaktifkan setelah URL pembayaran yang valid diberikan.</>
+              )}
+            </p>
+          </div>
+
+          <dl class="product-details">
+            <div>
+              <dt>Tipe Produk</dt>
+              <dd>{product.type === 'digital' ? 'Digital (file)' : 'Fisik (cetak/barang)'}</dd>
+            </div>
+            <div>
+              <dt>Kategori</dt>
+              <dd>{product.category}</dd>
+            </div>
+            <div>
+              <dt>Lisensi / Spesifikasi</dt>
+              <dd>{product.licenseLabel || '-'}</dd>
+            </div>
+            {product.checkout.provider && (
+              <div>
+                <dt>Provider Checkout</dt>
+                <dd>{product.checkout.provider}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .product-page {
+    padding: 3rem 0 6rem;
+  }
+
+  .breadcrumb {
+    margin-bottom: 2rem;
+  }
+
+  .breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+
+  .breadcrumb li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .breadcrumb li:not(:last-child)::after {
+    content: '/';
+    color: var(--color-border);
+  }
+
+  .breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color 120ms;
+  }
+
+  .breadcrumb a:hover {
+    color: var(--color-brand);
+  }
+
+  .breadcrumb [aria-current="page"] {
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  .product-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .product-gallery {
+    position: sticky;
+    top: 2rem;
+  }
+
+  .product-main-image {
+    aspect-ratio: 4/3;
+  }
+
+  .product-info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .product-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .product-type-badge {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--color-brand);
+    color: var(--color-on-brand);
+  }
+
+  .product-category {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text);
+    padding: 0.25rem 0.75rem;
+    background: var(--color-border);
+  }
+
+  .product-title {
+    font-size: clamp(1.75rem, 3.5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .product-price-large {
+    font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+    font-weight: 800;
+    color: var(--color-brand);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .product-license-label {
+    font-size: 0.9375rem;
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  .product-description {
+    margin: 1rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .product-cta-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .product-notice {
+    padding: 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0;
+  }
+
+  .product-notice p {
+    margin: 0;
+  }
+
+  .product-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+    margin: 0;
+  }
+
+  .product-details div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .product-details dt {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+  }
+
+  .product-details dd {
+    font-size: 0.9375rem;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  /* Sticky CTA bar on mobile */
+  @media (max-width: 767px) {
+    .product-info-panel {
+      position: relative;
+    }
+
+    .product-cta-group {
+      position: sticky;
+      bottom: 0;
+      background: var(--color-bg);
+      padding: 1rem;
+      margin: 1rem -1rem -1rem;
+      border-top: 1px solid var(--color-border);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+      z-index: 10;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .product-layout {
+      grid-template-columns: 7fr 5fr;
+      align-items: start;
+    }
+
+    .product-gallery {
+      position: sticky;
+      top: 2rem;
+    }
+
+    .product-info-panel {
+      position: sticky;
+      top: 2rem;
+    }
+  }
+</style>
+
+<script>
+  // Add class to body for mobile sticky CTA handling
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.innerWidth < 768) {
+      document.body.classList.add('has-sticky-cta');
+    }
+  });
+</script>

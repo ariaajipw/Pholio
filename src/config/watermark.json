@@ -1,0 +1,21 @@
+{
+  "watermark": {
+    "enabled": true,
+    "text": "© Pholio",
+    "fontSize": 24,
+    "fontColor": "rgba(255,255,255,0.7)",
+    "position": "bottom-right",
+    "padding": 20
+  },
+  "image": {
+    "maxWidth": 1920,
+    "maxHeight": 1080,
+    "webpQuality": 82,
+    "avifQuality": 50,
+    "formats": ["webp"]
+  },
+  "naming": {
+    "outputSuffix": "-wm",
+    "outputFormat": "webp"
+  }
+}

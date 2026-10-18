@@ -1,0 +1,295 @@
+---
+/**
+ * Lightbox — minimal vanilla-JS photo viewer.
+ *
+ * Active only when `features.lightbox` is enabled (the parent page
+ * renders this component conditionally). Triggered by elements marked
+ * with `data-lightbox-open` carrying:
+ *   - data-lightbox-src   image URL
+ *   - data-lightbox-alt   alt text
+ *   - data-lightbox-title optional caption
+ *
+ * Behavior:
+ *   - Open/close, Escape, backdrop click to close
+ *   - Prev/next buttons, ArrowLeft/ArrowRight, touch swipe
+ *   - Focus moved into dialog and restored to the trigger on close
+ *   - Background scroll locked while open (body.lightbox-open)
+ *   - No animations: inherently respects prefers-reduced-motion
+ */
+---
+
+<div class="lightbox" id="lightbox" hidden>
+  <div class="lightbox-overlay" role="dialog" aria-modal="true" aria-label="Pratinjau foto">
+    <button type="button" class="lightbox-close" aria-label="Tutup pratinjau (Esc)">
+      <span aria-hidden="true">&#10005;</span>
+    </button>
+
+    <button type="button" class="lightbox-nav lightbox-nav--prev" aria-label="Foto sebelumnya">
+      <span aria-hidden="true">&#8249;</span>
+    </button>
+
+    <figure class="lightbox-content">
+      <img class="lightbox-image" src="" alt="" />
+      <figcaption class="lightbox-caption"></figcaption>
+    </figure>
+
+    <button type="button" class="lightbox-nav lightbox-nav--next" aria-label="Foto berikutnya">
+      <span aria-hidden="true">&#8250;</span>
+    </button>
+  </div>
+</div>
+
+<style>
+  .lightbox[hidden] {
+    display: none;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.95);
+  }
+
+  .lightbox-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+
+  .lightbox-image {
+    max-width: min(90vw, 1400px);
+    max-height: 78vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .lightbox-caption {
+    margin: 0.75rem 0 0;
+    color: #ffffff;
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  .lightbox-caption:empty {
+    display: none;
+  }
+
+  .lightbox-close,
+  .lightbox-nav {
+    position: fixed;
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .lightbox-close {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .lightbox-nav {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lightbox-nav--prev {
+    left: 1rem;
+  }
+
+  .lightbox-nav--next {
+    right: 1rem;
+  }
+
+  .lightbox-close:focus-visible,
+  .lightbox-nav:focus-visible {
+    outline: 3px solid #1d5fcc;
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 767px) {
+    .lightbox-content {
+      max-width: 100%;
+    }
+
+    .lightbox-image {
+      max-height: 70vh;
+    }
+
+    .lightbox-nav {
+      width: 40px;
+      height: 40px;
+      font-size: 1.25rem;
+    }
+
+    .lightbox-nav--prev {
+      left: 0.5rem;
+    }
+
+    .lightbox-nav--next {
+      right: 0.5rem;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const lightbox = document.getElementById('lightbox');
+    if (!lightbox) return;
+
+    // Narrowed, non-null references for use inside closures.
+    const lightboxEl = lightbox;
+
+    const overlay = lightboxEl.querySelector<HTMLElement>('.lightbox-overlay');
+    const image = lightbox.querySelector<HTMLImageElement>('.lightbox-image');
+    const caption = lightbox.querySelector('.lightbox-caption');
+    const closeBtn = lightbox.querySelector<HTMLButtonElement>('.lightbox-close');
+    const prevBtn = lightbox.querySelector<HTMLButtonElement>('.lightbox-nav--prev');
+    const nextBtn = lightbox.querySelector<HTMLButtonElement>('.lightbox-nav--next');
+
+    if (!overlay || !image || !caption || !closeBtn || !prevBtn || !nextBtn) return;
+
+    // Narrowed, non-null references for use inside closures.
+    const overlayEl = overlay;
+    const imageEl = image;
+    const captionEl = caption;
+    const closeBtnEl = closeBtn;
+    const prevBtnEl = prevBtn;
+    const nextBtnEl = nextBtn;
+
+    let triggers: HTMLElement[] = [];
+    let currentIndex = -1;
+    let lastFocused: HTMLElement | null = null;
+    let pointerStartX: number | null = null;
+
+    function refreshTriggers() {
+      triggers = Array.from(document.querySelectorAll<HTMLElement>('[data-lightbox-open]'));
+    }
+
+    function setImage(index: number) {
+      const trigger = triggers[index];
+      if (!trigger) return;
+      imageEl.src = trigger.dataset.lightboxSrc || '';
+      imageEl.alt = trigger.dataset.lightboxAlt || '';
+      captionEl.textContent = trigger.dataset.lightboxTitle || '';
+    }
+
+    function open(index: number) {
+      refreshTriggers();
+      if (index < 0 || index >= triggers.length) return;
+      currentIndex = index;
+      lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      setImage(index);
+      prevBtnEl.hidden = triggers.length < 2;
+      nextBtnEl.hidden = triggers.length < 2;
+      lightboxEl.hidden = false;
+      document.body.classList.add('lightbox-open');
+      document.body.style.overflow = 'hidden';
+      closeBtnEl.focus();
+    }
+
+    function close() {
+      lightboxEl.hidden = true;
+      document.body.classList.remove('lightbox-open');
+      document.body.style.overflow = '';
+      if (lastFocused) {
+        lastFocused.focus();
+        lastFocused = null;
+      }
+    }
+
+    function step(delta: number) {
+      if (triggers.length < 2) return;
+      currentIndex = (currentIndex + delta + triggers.length) % triggers.length;
+      setImage(currentIndex);
+    }
+
+    // Open via event delegation so the order of trigger markup and this
+    // script never matters.
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const trigger = target.closest('[data-lightbox-open]');
+      if (!(trigger instanceof HTMLElement)) return;
+      refreshTriggers();
+      open(triggers.indexOf(trigger));
+    });
+
+    closeBtnEl.addEventListener('click', close);
+    prevBtnEl.addEventListener('click', () => step(-1));
+    nextBtnEl.addEventListener('click', () => step(1));
+
+    // Backdrop click (not on image/controls) closes.
+    overlayEl.addEventListener('click', (event) => {
+      if (event.target === overlayEl) close();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (lightboxEl.hidden) return;
+
+      if (event.key === 'Escape') {
+        close();
+        return;
+      }
+      if (event.key === 'ArrowLeft') {
+        step(-1);
+        return;
+      }
+      if (event.key === 'ArrowRight') {
+        step(1);
+        return;
+      }
+
+      // Simple focus trap between dialog controls.
+      if (event.key === 'Tab') {
+        const focusables = [closeBtnEl, prevBtnEl, nextBtnEl].filter((el) => !el.hidden);
+        if (focusables.length === 0) {
+          event.preventDefault();
+          return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+        if (event.shiftKey && (active === first || !lightboxEl.contains(active))) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && (active === last || !lightboxEl.contains(active))) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
+    // Touch swipe navigation.
+    overlayEl.addEventListener('pointerdown', (event: PointerEvent) => {
+      pointerStartX = event.clientX;
+    });
+
+    overlayEl.addEventListener('pointerup', (event: PointerEvent) => {
+      if (pointerStartX === null) return;
+      const delta = event.clientX - pointerStartX;
+      pointerStartX = null;
+      if (Math.abs(delta) > 40) {
+        step(delta < 0 ? 1 : -1);
+      }
+    });
+  })();
+</script>

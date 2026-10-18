@@ -1,0 +1,6 @@
+# Pholio — robots.txt
+# Domain produksi belum ditentukan (baseUrl kosong). Saat domain aktif,
+# tambahkan baris "Sitemap: https://<domain>/sitemap-index.xml".
+
+User-agent: *
+Allow: /

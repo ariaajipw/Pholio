@@ -1,0 +1,86 @@
+---
+/**
+ * SEO component for metadata, Open Graph, and structured data
+ *
+ * URL rules:
+ * - `baseUrl` comes from `src/config/site.json`. While it is empty
+ *   (demo mode), the current request origin (localhost in dev/build)
+ *   is used — never a fabricated production domain.
+ * - Canonical link is only rendered when `baseUrl` is configured.
+ */
+import { getSiteConfig } from '../config/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  noIndex?: boolean;
+  noFollow?: boolean;
+  structuredData?: Record<string, unknown>;
+}
+
+const {
+  title = '',
+  description = '',
+  canonical,
+  ogImage,
+  ogType = 'website',
+  noIndex = false,
+  noFollow = false,
+  structuredData,
+} = Astro.props;
+
+const config = getSiteConfig();
+const siteName = config.name;
+
+// Absolute URL base for metadata. Never fabricated: only the configured
+// baseUrl or the real request origin (localhost during build/dev).
+const base = (config.baseUrl || '').replace(/\/$/, '') || Astro.url?.origin || '';
+const pagePath = canonical || Astro.url?.pathname || '/';
+const pageUrl = base ? `${base}${pagePath}` : undefined;
+const ogImagePath = ogImage || '/og-default.jpg';
+const pageOgImage = base ? `${base}${ogImagePath}` : ogImagePath;
+
+const pageTitle = title ? `${title} | ${siteName}` : siteName;
+const pageDescription = description || config.tagline;
+const robots = [noIndex && 'noindex', noFollow && 'nofollow'].filter(Boolean).join(', ');
+---
+
+<!-- Primary Meta Tags -->
+<title>{pageTitle}</title>
+<meta name="description" content={pageDescription} />
+<meta name="generator" content={Astro.generator} />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+{robots && <meta name="robots" content={robots} />}
+
+<!-- Canonical URL (only with a configured production baseUrl) -->
+{canonical && config.baseUrl && <link rel="canonical" href={pageUrl} />}
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={ogType} />
+{pageUrl && <meta property="og:url" content={pageUrl} />}
+<meta property="og:title" content={title || siteName} />
+<meta property="og:description" content={pageDescription} />
+<meta property="og:image" content={pageOgImage} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:locale" content={config.locale} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+{pageUrl && <meta name="twitter:url" content={pageUrl} />}
+<meta name="twitter:title" content={title || siteName} />
+<meta name="twitter:description" content={pageDescription} />
+<meta name="twitter:image" content={pageOgImage} />
+
+<!-- Structured Data -->
+{structuredData && (
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+)}
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />

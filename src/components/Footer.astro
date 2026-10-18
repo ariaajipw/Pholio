@@ -1,0 +1,236 @@
+---
+/**
+ * Footer component
+ */
+import { getSiteConfig } from '../config/site';
+
+const config = getSiteConfig();
+const { photographer, contact, social, navigation, name } = config;
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer" role="contentinfo">
+  <div class="container footer-inner">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <p class="footer-name">{photographer}</p>
+        <p class="footer-tagline">{name} — Portfolio Fotografi & Katalog</p>
+      </div>
+
+      <nav class="footer-nav" aria-label="Navigasi footer">
+        <ul role="list">
+          {navigation.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="footer-contact">
+        <h2 class="footer-heading">Kontak</h2>
+        <address class="footer-address" style="font-style: normal;">
+          {contact.email && (
+            <p><a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+          )}
+          {contact.whatsapp && (
+            <p>
+              <a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer">
+                WhatsApp: {contact.whatsapp}
+              </a>
+            </p>
+          )}
+          {contact.instagram && (
+            <p>
+              <a href={`https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer">
+                Instagram: {contact.instagram}
+              </a>
+            </p>
+          )}
+          {contact.location && (
+            <p>{contact.location}</p>
+          )}
+        </address>
+      </div>
+
+      <div class="footer-social">
+        <h2 class="footer-heading">Media Sosial</h2>
+        <ul class="footer-social-list" role="list">
+          {social.map((item) => (
+            <li>
+              <a href={item.url} target="_blank" rel="noopener noreferrer" aria-label={item.name}>
+                {item.icon}
+                <span>{item.name}</span>
+              </a>
+            </li>
+          ))}
+          {social.length === 0 && contact.instagram && (
+            <li>
+              <a href={`https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+                <span>Instagram</span>
+              </a>
+            </li>
+          )}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copyright">
+        &copy; {currentYear} {photographer}. Hak cipta dilindungi.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    /* Ruang bawah ekstra agar tombol WhatsApp melayang tidak menutupi
+       konten footer saat halaman digulir penuh (DESIGN §7.8) */
+    padding: 4rem 0 6rem;
+    margin-top: auto;
+  }
+
+  .footer-inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .footer-name {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 0.5rem;
+  }
+
+  .footer-tagline {
+    font-size: 0.9375rem;
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  .footer-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 0.5rem;
+    margin-inline: -0.5rem;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    transition: opacity 120ms;
+  }
+
+  .footer-nav a:hover {
+    opacity: 0.6;
+    color: var(--color-brand);
+  }
+
+  .footer-heading {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    margin: 0 0 1rem;
+  }
+
+  .footer-address {
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: var(--color-text);
+  }
+
+  .footer-address a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 120ms;
+  }
+
+  .footer-address a:hover {
+    opacity: 0.6;
+    color: var(--color-brand);
+  }
+
+  .footer-social-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer-social-list a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    gap: 0.75rem;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    transition: opacity 120ms;
+  }
+
+  .footer-social-list a:hover {
+    opacity: 0.6;
+    color: var(--color-brand);
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 2rem;
+    margin-top: 1rem;
+  }
+
+  .footer-copyright {
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .footer {
+      padding: 3rem 0 1.5rem;
+    }
+
+    .footer-inner {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding-bottom: 2rem;
+    }
+
+    .footer-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+</style>
