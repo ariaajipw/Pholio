@@ -13,6 +13,12 @@
   --color-whatsapp: #167D48;
   --color-grid-line: rgb(10 11 16 / 0.08);
   --color-scrim: rgb(0 0 0 / 0.55);
+
+  /* Breakpoints per DESIGN.md §3.3.4 */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1200px;
 }
 
 /* Bold preset variant */

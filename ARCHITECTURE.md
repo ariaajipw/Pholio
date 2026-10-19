@@ -9,6 +9,37 @@
 - Penyedia pembayaran mengelola checkout dan proses transaksi. Website tidak menerima data kartu dan tidak memverifikasi transaksi sendiri.
 - Default desain adalah preset **Bold** (hero `stagger`, header `split-nav`, filter/lightbox/GridLines aktif); preset **Editorial** tetap tersedia sebagai alternatif (lihat §10).
 
+### 1.1 Styling Architecture — Tailwind CSS v4
+
+Proyek ini menggunakan **Tailwind CSS v4** dengan arsitektur `@import "tailwindcss"` (tanpa file `tailwind.config.js` terpisah). Implementasi saat ini:
+
+| Aspek | Implementasi |
+|---|---|
+| **Import** | `@import "tailwindcss";` di `src/styles/global.css` line 1 |
+| **Theme tokens** | `@theme` block di `global.css` lines 3–16 (hanya warna Editorial default saat ini) |
+| **Preset switching** | CSS custom properties di `:root[data-theme-preset="bold"]` + `<html data-theme-preset={themePreset}>` di `BaseLayout.astro` |
+| **Vite plugin** | `@tailwindcss/vite` di `astro.config.mjs` |
+| **Config file** | Tidak ada `tailwind.config.js` (benar untuk v4) |
+| **Content detection** | Auto via Vite plugin (scan `.astro`, `.ts`, `.tsx`, `.js`, `.jsx`, `.html`) |
+| **CSS custom properties** | Digunakan untuk theme switching & kompatibilitas v1 (`--color-accent`, `--color-on-accent`) |
+
+**Token ownership & synchronization rules (lihat DESIGN.md §3.3):**
+
+- **Tailwind `@theme`** mendefinisikan nilai default (Editorial preset). Menghasilkan utility seperti `bg-brand`, `text-muted`, `border-border`.
+- **Preset runtime (CSS custom properties)** meng-override nilai yang sengaja berubah per preset (warna, grid-line) via selector `:root[data-theme-preset="bold"]`. Component CSS yang memakai `var(--color-brand)` otomatis menerima nilai Bold.
+- **Compatibilitas v1** mengikuti `--color-brand` via `var()` — tidak didefinisikan ulang.
+- **Jangan** menduplikasi nilai yang sama di ketiga lapis. Gunakan `var()` untuk merujuk ke atas.
+
+**Konvensi project-specific (DESIGN.md §16.2):**
+
+- Utility-first default untuk layout, spacing, typography, colors, borders, shadows, responsive, states
+- `@theme` untuk design tokens (warna, spacing, typography clamp, breakpoints, shadows, transitions)
+- `@utility` untuk pola reusable (mis. `text-display-*`, `container`, `scrim-gradient`, `grid-lines`, `btn-hard`)
+- Component `<style>` untuk pola kompleks (photo frame, lightbox, mosaic grid, header restructure, sticky CTA, WhatsApp float)
+- CSS custom properties untuk theme switching
+- Arbitrary values diizinkan (`clamp()`, custom widths, exact spacing, specialized gradients, animation values — gunakan `[value]` syntax)
+- No `@apply`, no `@layer` (v4 tidak menganjurkan/menggunakan keduanya)
+
 ## 2. Alur foto: mana untuk ditampilkan vs mana untuk dijual/dikirim
 
 Setiap foto punya **dua peran berbeda** dan keduanya memakai **folder berbeda**.
@@ -153,7 +184,34 @@ Contoh `src/content/gallery.json`:
 - Field opsional `width`/`height` dapat ditambahkan untuk mempertahankan rasio asli (DESIGN §15); tanpa field ini, frame memakai rasio desain.
 - Gunakan alt text yang menjelaskan isi visual; jangan menjejalkan kata kunci SEO.
 
-## 6. Rute dan fungsi halaman
+---
+
+## 6. Breakpoint Tokens & Responsivitas
+
+Breakpoint yang digunakan di codebase **tidak cocok** dengan default Tailwind v4:
+
+| Nama | Nilai | Digunakan Di | Tailwind Default |
+|---|---|---|---|
+| `sm` | 640px | Gallery 2-col, hero overlap grid | 640px ✓ |
+| `md` | 768px | Header mobile restructure, product sticky CTA, contact 2-col, about 2-col | 768px ✓ |
+| `lg` | 1024px | GridLines active, hero stagger 2-col, product 2-col | 1024px ✓ |
+| `xl` | 1200px | Featured 12-col grid, shop 3-col, intro 2-col | 1280px ✗ |
+
+**Rencana migrasi:** Tambahkan `@theme` breakpoints seperti DESIGN.md §3.3.4. Kemudian gunakan prefix `sm:`, `md:`, `lg:`, `xl:` di utility. **Jangan** mengubah media query component yang sudah ada sebelum token breakpoint tersedia dan diverifikasi visual parity.
+
+Responsivitas halaman mengikuti DESIGN.md §5.2:
+
+| Lebar | Perilaku |
+|---|---|
+| **Mobile (360–767 px)** | Satu atau dua kolom sesuai orientasi foto. Hero overlap: foto 70–80% lebar, kata display diskalakan dan boleh terpotong di tepi. Hero stagger: indentasi bertingkat dihapus, rata kiri. Navigasi ringkas. |
+| **Tablet (768–1199 px)** | Dua atau tiga kolom. Indentasi stagger dikurangi sekitar separuh. |
+| **Desktop (1200 px ke atas)** | Tiga atau empat kolom bila foto tetap nyaman dilihat. Komposisi editorial penuh. Garis grid aktif. |
+
+Jangan menentukan jumlah kolom hanya dari breakpoint; cek lebar aktual kartu, panjang judul, dan proporsi gambar. Gunakan `aspect-ratio`, `width`/`height` atau mekanisme reservasi ruang agar tidak ada layout shift.
+
+---
+
+## 7. Rute dan fungsi halaman
 
 - `/` — identitas fotografer, hero image-first, karya pilihan, pengantar, CTA ke galeri/katalog.
 - `/gallery` — galeri dan kategori foto; filter sisi klien dan lightbox bila flag aktif.
@@ -165,7 +223,56 @@ Contoh `src/content/gallery.json`:
 
 Daftar di atas adalah struktur starter lengkap. Paket Lite boleh menggabungkan konten atau menghilangkan rute; jumlah jenis halaman, URL, produk, dan foto harus dijelaskan terpisah dalam proposal. Satu template detail produk dapat menghasilkan beberapa URL statis dan tidak perlu didesain satu per satu.
 
-## 7. Pipeline gambar
+---
+
+## 8. CSS Migration Patterns — Classification
+
+Setiap pola CSS diklasifikasikan sebelum dimigrasikan ke Tailwind utilities (detail di DESIGN.md §7.11):
+
+### Migrate — Pindahkan ke Utility Tailwind
+Pola presentasi dan layout standar yang aman diekspresikan sebagai utility:
+- Display, flex, grid → `flex`, `grid`, `grid-cols-*`, `gap-*`
+- Spacing (margin, padding, gap) → `p-*`, `m-*`, `gap-*` dengan arbitrary values `gap-[clamp(12px,2vw,24px)]`
+- Typography sederhana → `text-*`, `font-*`, `leading-*`, `tracking-*`, `uppercase`
+- Colors (bg, text, border) → `bg-brand`, `text-muted`, `border-border` (dari `@theme`)
+- Borders, radii → `border`, `border-brand`, `rounded-none`
+- Shadows sederhana → `shadow-md`, `shadow-[0_4px_12px_rgba(0,0,0,0.15)]`
+- Responsive layout → `@media (min-width: 640px)` → `sm:`
+- State variants → `hover:`, `focus-visible:`, `active:`, `disabled:`
+- Transitions → `transition-[transform,box-shadow] duration-120`
+- Container utility → `@utility container` atau component pattern
+
+### Evaluate Individually — Perlu Penilaian Kasus-per-Kasus
+Pola yang melibatkan arbitrary values, perilaku responsif kompleks, atau komposisi komponen khusus:
+- GridLines decorative layer (`global.css` lines 82–98, `GridLines.astro`) — kandidat `@utility grid-lines`
+- Scrim gradient (`global.css` lines 101–103) — kandidat `@utility scrim-gradient`
+- Photo frame system (`global.css` lines 319–341) — multi-element, pertahankan sebagai component CSS
+- Hero stagger indent (`index.astro`) — content-specific, pertahankan
+- Gallery mosaic grid (`gallery.astro`) — 12-col dengan `grid-column: span 7/5`, `grid-row: 1/3`, pertahankan
+- Header mobile restructure (`Header.astro`) — `flex-wrap`, `order`, `row-gap` changes, pertahankan
+- Sticky CTA bar mobile (`[id].astro`) — `position: sticky`, negative margins, `has-sticky-cta` body class + JS, pertahankan
+- WhatsApp float + IntersectionObserver (`global.css`, `BaseLayout.astro`) — `env(safe-area-inset)`, fixed positioning, JS coordination, pertahankan
+
+### Retain — Tetap sebagai CSS Biasa
+CSS yang lebih jelas, aman, dan maintainable sebagai CSS biasa:
+- Complex keyframe animations (M2 scroll-driven) — awkward/brittle sebagai utility strings; belum diimplementasikan
+- Lightbox (overlay, focus trap, focus restoration, swipe, keyboard nav) — tightly coupled ke JS behavior
+- Reduced motion global reset (`global.css` lines 354–362) — `*` selector dengan `!important`, global baseline
+- Focus-visible global outline (`global.css` lines 58–61) — accessibility baseline
+- Skip link (`global.css` lines 64–79) — accessibility pattern, tidak reusable
+- Font loading / `@font-face` — belum ada; saat ditambah, pertahankan di CSS global
+- Print styles (jika ditambah) — media-specific, tidak utility
+
+### Cascade & Coexistence Rules (selama migrasi bertahap)
+1. Existing CSS dan Tailwind utilities coexist — Urutannya: `@import "tailwindcss"` (base, components, utilities) → component `<style>` blocks (spesifik, override)
+2. Component scoped styles (Astro) memiliki specificity lebih tinggi dari utility global. Hindari `!important` kecuali reduced motion.
+3. Saat memigrasi pola, hapus CSS lama **hanya setelah** memverifikasi utility Tailwind menghasilkan computed style yang sama (cek DevTools).
+4. Setelah setiap batch migrasi, `npm run build` harus berhasil.
+5. Visual parity check — Bandingkan viewport 360px, 768px, 1024px, 1200px+ sebelum dan sesudah.
+
+---
+
+## 9. Pipeline gambar
 
 1. Foto master masuk ke `private-assets/source/` atau lokasi privat lain yang tidak dilacak Git.
 2. `scripts/optimize-images.mjs` membaca sumber yang dipilih dan menghasilkan preview.
@@ -228,7 +335,7 @@ Teks watermark menggunakan `siteConfig.photographer` dari `src/config/site.json`
 - Hanya memproses file regular (bukan directory, bukan symlink ke luar)
 - Error handling per-file: gagal satu file tidak menghentikan proses, log nama file dan alasan kegagalan
 
-### 7.4 Render gambar di halaman (sejak A3.3)
+### 9.4 Render gambar di halaman (sejak A3.3)
 
 - Halaman memakai `<img>` hanya bila file preview benar-benar ada saat build (`src/lib/has-public-asset.ts`). Bila belum ada, hanya frame placeholder yang dirender — tidak ada request 404 maupun error console.
 - Frame `.photo-frame` memakai `aspect-ratio` tetap sehingga ruang layout sudah tersedia sebelum gambar dimuat (tidak ada CLS).
@@ -270,7 +377,7 @@ Teks watermark menggunakan `siteConfig.photographer` dari `src/config/site.json`
 - Akun dan dana harus dikelola langsung oleh klien. Klien menanggung biaya provider dan memastikan hak menjual konten/lisensi.
 - URL pembelian disetel satu per produk. Tidak ada API pembayaran atau pembuatan link dinamis dari website.
 
-## 10. SEO, aksesibilitas, dan performa
+## 12. SEO, aksesibilitas, dan performa
 
 - Setiap halaman memiliki title dan description yang relevan, canonical URL saat domain produksi diketahui, metadata Open Graph, dan URL yang sesuai.
 - Sertakan sitemap, `robots.txt`, dan halaman 404.
@@ -279,7 +386,7 @@ Teks watermark menggunakan `siteConfig.photographer` dari `src/config/site.json`
 - Target Lighthouse untuk halaman representatif: minimal 75 mobile dan 80 desktop dengan pengujian konsisten; aksesibilitas minimal 90.
 - Skor bukan pengganti QA: perbaiki broken links, isu keyboard/fokus, kontras yang jelas bermasalah, metadata hilang, dan kebocoran master.
 
-### 10.1 Sitemap dan URL metadata
+### 12.1 Sitemap dan URL metadata
 
 - `@astrojs/sitemap` menghasilkan `sitemap-0.xml`/`sitemap-index.xml` saat build; halaman 404 difilter keluar.
 - `site` di `astro.config.mjs` dibaca dari `site.json` → `baseUrl`. Selama `baseUrl` kosong (demo), build memakai `http://localhost:4321` agar sitemap tetap dapat diverifikasi — bukan domain produksi buatan.
@@ -287,25 +394,25 @@ Teks watermark menggunakan `siteConfig.photographer` dari `src/config/site.json`
 - Fallback Open Graph adalah `public/og-default.jpg` (1200×630, aset demo buatan sendiri). Tanpa PWA/manifest: referensi `site.webmanifest` sengaja tidak ada.
 - `public/robots.txt` berisi `User-agent: * / Allow: /`; baris `Sitemap:` ditambahkan saat domain produksi diketahui.
 
-### 10.2 Perilaku klik galeri
+### 12.2 Perilaku klik galeri
 
 - Klik foto membuka lightbox **hanya** bila `features.lightbox` aktif; tanpa flag, foto adalah `<img>` biasa.
 - Tautan ke detail produk adalah tautan eksplisit "Lihat detail produk" pada kartu yang punya `productId`; tersedia di kedua keadaan flag.
 - `GridLines` aktif hanya bila `features.gridLines` AND preset `bold`; dekoratif (`aria-hidden`, `pointer-events: none`), di belakang konten, dan disembunyikan di bawah 1024 px.
 
-### 10.3 Sistem tombol dan elemen melayang (sejak A3.2)
+### 12.3 Sistem tombol dan elemen melayang (sejak A3.2)
 
 - Komponen memakai kelas netral `.btn-primary` / `.btn-secondary`; gaya mengikuti `data-theme-preset` di `<html>` (Editorial: solid + underline; Bold: outline tebal + bayangan keras, DESIGN §7.4). Class lama (`btn-primary-editorial`, `btn-secondary-editorial`, `btn-hard`) tetap didukung sebagai alias.
 - Target sentuh minimal 44×44 px di header, footer, breadcrumb, filter, dan tautan detail.
 - Tombol WhatsApp melayang disembunyikan otomatis (IntersectionObserver, tanpa dependency) saat footer terlihat agar tidak menutupi konten footer (DESIGN §7.8).
 
-### 10.4 Homepage (preset Bold)
+### 12.4 Homepage (preset Bold)
 
 - Hero `stagger`: komposisi asimetris 5/7 (foto unggulan kiri, judul display dengan indentasi bertingkat kanan) mulai 1024 px; di bawahnya bertumpuk. Halaman `h1` adalah kalimat utuh yang terbaca ("Fotografi adalah cerita") — bukan salinan dekoratif ber-`aria-hidden`.
 - "Karya Pilihan" dirender dari item `featured` di `gallery.json` (grid asimetris 7/5/5 di desktop), dengan fallback placeholder bila preview belum ada.
 - Preset Editorial memakai hero `overlap`; keduanya memakai token dan komponen yang sama.
 
-## 11. Status kesiapan produksi (checklist)
+## 13. Status kesiapan produksi (checklist)
 
 Sebelum deploy produksi, pastikan:
 

@@ -18,9 +18,9 @@ const themePreset = config.theme.preset;
     <meta charset="utf-8" />
     <SEO {...Astro.props} />
   </head>
-  <body class="page-body">
+  <body class="flex flex-col min-h-screen">
     <Header />
-    <main id="main-content" class="main-content">
+    <main id="main-content" class="flex-1 w-full">
       <slot />
     </main>
     <Footer />
@@ -39,19 +39,6 @@ const themePreset = config.theme.preset;
     )}
   </body>
 </html>
-
-<style>
-  .page-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-
-  .main-content {
-    flex: 1;
-    width: 100%;
-  }
-</style>
 
 <script>
   // Sembunyikan tombol WhatsApp melayang saat footer terlihat agar tidak

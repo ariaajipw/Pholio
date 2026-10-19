@@ -162,6 +162,155 @@ Ketentuan:
 
 ---
 
+## 3.3 Tailwind CSS v4 Theme Tokens — Three-Layer Architecture
+
+Starter ini menggunakan **Tailwind CSS v4** dengan arsitektur `@import "tailwindcss"` (tanpa file konfigurasi terpisah). Token desain dideklarasikan di `@theme` dalam `src/styles/global.css` untuk nilai-nilai yang digunakan oleh utility Tailwind. Proyek ini mempertahankan **tiga lapis token** dengan peran berbeda — lihat §3.3.1.
+
+### 3.3.1 Arsitektur Token Tiga Lapis
+
+Proyek ini mempertahankan tiga lapis token dengan peran yang berbeda:
+
+| Lapis | Lokasi | Peran | Contoh |
+|---|---|---|---|
+| **Tailwind `@theme`** | `src/styles/global.css` lines 3–16 | Sumber kebenaran untuk utility Tailwind (`bg-brand`, `text-muted`, `rounded-lg`, dll.) | `--color-brand: #0A0B10` |
+| **Preset runtime (CSS custom properties)** | `src/styles/global.css` lines 19–37 | Nilai yang **berubah per preset** via `data-theme-preset` pada `<html>`; dibaca langsung oleh component CSS | `--color-brand: #D40000` (Bold) |
+| **Compatibilitas v1** | `src/styles/global.css` lines 34–37 | Alias lama (`--color-accent`, `--color-on-accent`) untuk kode warisan | `--color-accent: var(--color-brand)` |
+
+**Aturan sinkronisasi:**
+- `@theme` mendefinisikan nilai **default (Editorial)**.
+- Preset runtime **meng-override** nilai yang berubah (warna, grid-line) via selector `:root[data-theme-preset="bold"]`.
+- Lapis compatibilitas **mengikuti** `--color-brand` via `var()` — tidak didefinisikan ulang.
+- **Jangan** menduplikasi nilai yang sama di ketiga lapis. Gunakan `var()` untuk merujuk ke atas.
+
+### 3.3.2 Token `@theme` (Editorial Default)
+
+```css
+@theme {
+  /* Editorial preset (default) */
+  --color-bg: #F3F3F1;
+  --color-surface: #FFFFFF;
+  --color-text: #0A0B10;
+  --color-muted: #62625E;
+  --color-border: #D9D9D5;
+  --color-brand: #0A0B10;
+  --color-on-brand: #FFFFFF;
+  --color-focus: #1D5FCC;
+  --color-whatsapp: #167D48;
+  --color-grid-line: rgb(10 11 16 / 0.08);
+  --color-scrim: rgb(0 0 0 / 0.55);
+}
+```
+
+Token ini otomatis menghasilkan utility Tailwind:
+- Warna: `bg-brand`, `text-muted`, `border-border`, `bg-surface`, `text-on-brand`, dll.
+- Semantic: `focus:ring-focus`, `bg-whatsapp`
+
+### 3.3.3 Preset Runtime Override (Bold)
+
+```css
+:root[data-theme-preset="bold"] {
+  --color-bg: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-text: #1B1111;
+  --color-muted: #6A6060;
+  --color-border: #EBC9C9;
+  --color-brand: #D40000;
+  --color-on-brand: #FFFFFF;
+  --color-focus: #1D5FCC;
+  --color-whatsapp: #167D48;
+  --color-grid-line: rgb(212 0 0 / 0.22);
+  --color-scrim: rgb(0 0 0 / 0.55);
+}
+```
+
+Nilai-nilai ini **tidak** ada di `@theme` karena mereka sengaja berubah per preset. Component CSS yang memakai `var(--color-brand)` akan otomatis menerima nilai Bold ketika `<html data-theme-preset="bold">`.
+
+### 3.3.4 Token Spacing, Typography, Breakpoints, Shadows
+
+```css
+@theme {
+  /* Spacing — skala 4/8 px + clamp gutter */
+  --spacing-gutter: clamp(16px, 3vw, 48px);
+  --container-max: 1600px;
+
+  /* Typography — clamp values from DESIGN.md §4.2 */
+  --text-display-overlap: clamp(4rem, 18vw, 16rem);
+  --text-display-stagger: clamp(2.75rem, 6vw, 6.5rem);
+  --text-heading-page: clamp(2.25rem, 4.5vw, 4.25rem);
+  --text-heading-section: clamp(1.75rem, 2.8vw, 2.75rem);
+  --text-body: clamp(1rem, 1.2vw, 1.125rem);
+  --text-caption: clamp(0.8125rem, 1.1vw, 0.875rem);
+  --text-nav-filter: clamp(0.8125rem, 1vw, 0.9375rem);
+
+  /* Line heights */
+  --leading-display-overlap: 0.85;
+  --leading-display-stagger: 0.96;
+  --leading-heading-page: 1.05;
+  --leading-heading-section: 1.1;
+  --leading-body: 1.7;
+  --leading-caption: 1.5;
+
+  /* Letter spacing */
+  --tracking-tight: -0.02em;
+  --tracking-tighter: -0.03em;
+  --tracking-wide: 0.08em;
+  --tracking-wider: 0.12em;
+
+  /* Breakpoints — match existing media queries (NOT Tailwind defaults) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1200px;
+
+  /* Shadows — Bold button hard shadow */
+  --shadow-btn-hard: 4px 4px 0 var(--color-brand);
+  --shadow-btn-hard-hover: 2px 2px 0 var(--color-brand);
+  --shadow-btn-hard-active: 0 0 0 var(--color-brand);
+  --shadow-whatsapp-float: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-whatsapp-float-hover: 0 6px 16px rgba(0, 0, 0, 0.2);
+  --shadow-product-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  /* Transitions */
+  --transition-fast: 120ms;
+  --transition-base: 200ms;
+}
+```
+
+> **Catatan:** Token spacing, typography, breakpoints, shadows, dan transitions di atas **belum diimplementasikan** di `@theme` saat ini. Saat ini hanya warna yang ada di `@theme`. Bagian ini mendokumentasikan **kontrak yang diinginkan** untuk migrasi. Agent migrasi harus menambahkan token ini ke `@theme` sebelum menggunakannya.
+
+---
+
+## 3.4 Breakpoint Tokens
+
+Breakpoint yang digunakan di codebase **tidak cocok** dengan default Tailwind:
+
+| Nama | Nilai | Digunakan Di | Tailwind Default |
+|---|---|---|---|
+| `sm` | 640px | Gallery 2-col, hero overlap grid | 640px ✓ |
+| `md` | 768px | Header mobile restructure, product sticky CTA, contact 2-col, about 2-col | 768px ✓ |
+| `lg` | 1024px | GridLines active, hero stagger 2-col, product 2-col | 1024px ✓ |
+| `xl` | 1200px | Featured 12-col grid, shop 3-col, intro 2-col | 1280px ✗ |
+
+**Migrasi:** Tambahkan `@theme` breakpoints seperti §3.3.4. Kemudian gunakan prefix `sm:`, `md:`, `lg:`, `xl:` di utility. **Jangan** mengubah media query component yang sudah ada sebelum token breakpoint tersedia dan diverifikasi visual parity.
+
+---
+
+## 3.5 Typography Utility Classes (Migration Target)
+
+Kelas utilitas tipografi saat ini di `global.css` (lines 117–164) akan dipindahkan ke `@utility` atau component-scoped utilities:
+
+| Kelas Saat Ini | Nilai | Rencana Migrasi |
+|---|---|---|
+| `.text-display-overlap` | `font-size: clamp(4rem, 18vw, 16rem); line-height: 0.85; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em;` | `@utility text-display-overlap` |
+| `.text-display-stagger` | `font-size: clamp(2.75rem, 6vw, 6.5rem); line-height: 0.96; font-weight: 800; text-transform: uppercase; letter-spacing: -0.03em;` | `@utility text-display-stagger` |
+| `.text-heading-page` | `font-size: clamp(2.25rem, 4.5vw, 4.25rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em;` | `@utility text-heading-page` |
+| `.text-heading-section` | `font-size: clamp(1.75rem, 2.8vw, 2.75rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.01em;` | `@utility text-heading-section` |
+| `.text-body` | `font-size: clamp(1rem, 1.2vw, 1.125rem); line-height: 1.7; max-width: 68ch;` | `@utility text-body` (max-width butuh arbitrary) |
+| `.text-caption` | `font-size: clamp(0.8125rem, 1.1vw, 0.875rem); line-height: 1.5; color: var(--color-muted);` | `text-caption text-muted` (Tailwind) |
+| `.text-nav-filter` | `font-size: clamp(0.8125rem, 1vw, 0.9375rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;` | `@utility text-nav-filter` |
+
+---
+
 ## 4. Tipografi
 
 ### 4.1 Arah
@@ -441,6 +590,79 @@ Kontak, tautan sosial, hak cipta, dan tautan legal yang relevan. Jangan mengaran
 
 ---
 
+## 7.11 Tailwind CSS v4 Migration Boundaries
+
+### 7.11.1 Kategori Migrasi
+
+Setiap pola CSS diklasifikasikan sebelum dimigrasikan:
+
+#### **Migrate** — Pindahkan ke Utility Tailwind
+Pola presentasi dan layout standar yang aman diekspresikan sebagai utility:
+
+| Pola | Contoh Lokasi | Utility Target |
+|---|---|---|
+| Display, flex, grid | Semua component `<style>` | `flex`, `grid`, `grid-cols-*`, `gap-*` |
+| Spacing (margin, padding, gap) | Component styles | `p-*`, `m-*`, `gap-*` dengan arbitrary values `gap-[clamp(12px,2vw,24px)]` |
+| Typography sederhana | `.text-body`, `.text-caption`, heading styles | `text-*`, `font-*`, `leading-*`, `tracking-*`, `uppercase` |
+| Colors (bg, text, border) | `var(--color-brand)`, `var(--color-muted)`, dll. | `bg-brand`, `text-muted`, `border-border` (dari `@theme`) |
+| Borders, radii | `border: 1px solid var(--color-border)`, `border-radius: 0` | `border`, `border-brand`, `rounded-none` |
+| Shadows sederhana | `box-shadow: 0 4px 12px rgba(0,0,0,0.15)` | `shadow-md`, `shadow-[0_4px_12px_rgba(0,0,0,0.15)]` |
+| Responsive layout | `@media (min-width: 640px)` → `sm:` | `sm:grid-cols-2`, `md:flex-row`, dll. |
+| State variants | `:hover`, `:focus-visible`, `:active`, `.btn--disabled` | `hover:`, `focus-visible:`, `active:`, `disabled:` |
+| Transitions | `transition: transform 120ms, box-shadow 120ms` | `transition-[transform,box-shadow] duration-120` |
+| Container utility | `.container` class | `@utility container` atau component pattern |
+
+#### **Evaluate Individually** — Perlu Penilaian Kasus-per-Kasus
+Pola yang melibatkan arbitrary values, perilaku responsif kompleks, atau komposisi komponen khusus:
+
+| Pola | Lokasi | Pertimbangan |
+|---|---|---|
+| GridLines decorative layer | `global.css` lines 82–98, `GridLines.astro` | `repeating-linear-gradient` + `position: absolute` + `pointer-events: none` — kandidat `@utility grid-lines` |
+| Scrim gradient | `global.css` lines 101–103 | `linear-gradient(to top, var(--color-scrim), transparent 55%)` — kandidat `@utility scrim-gradient` |
+| Photo frame system | `global.css` lines 319–341 | Multi-element (`.photo-frame`, `.frame-fallback`, `object-fit: cover/contain`) — pertahankan sebagai component CSS |
+| Hero stagger indent | `index.astro` lines 517–523 | `span:nth-child(2) { margin-left: 8.333% }` — content-specific, pertahankan |
+| Gallery mosaic grid | `gallery.astro` lines 306–341 | 12-col dengan `grid-column: span 7/5`, `grid-row: 1/3`, aspect-ratio per index — pertahankan |
+| Header mobile restructure | `Header.astro` lines 185–220 | `flex-wrap`, `order`, `row-gap` changes — kompleks, pertahankan |
+| Sticky CTA bar mobile | `[id].astro` lines 328–343, 363–369 | `position: sticky`, negative margins, `has-sticky-cta` body class + JS — pertahankan |
+| WhatsApp float + IntersectionObserver | `global.css` 264–302, `BaseLayout.astro` script | `env(safe-area-inset)`, fixed positioning, JS coordination — pertahankan |
+
+#### **Retain** — Tetap sebagai CSS Biasa
+CSS yang lebih jelas, aman, dan maintainable sebagai CSS biasa:
+
+| Pola | Alasan |
+|---|---|
+| **Complex keyframe animations** (M2 scroll-driven) | Awkward/brittle sebagai utility strings; belum diimplementasikan |
+| **Lightbox** (overlay, focus trap, focus restoration, swipe, keyboard nav) | Tightly coupled ke JS behavior; vanilla JS minimal |
+| **Reduced motion global reset** | `global.css` lines 354–362 — `*` selector dengan `!important`, global baseline |
+| **Focus-visible global outline** | `global.css` lines 58–61 — accessibility baseline |
+| **Skip link** | `global.css` lines 64–79 — accessibility pattern, tidak reusable |
+| **Font loading / `@font-face`** | Belum ada; saat ditambah, pertahankan di CSS global |
+| **Print styles** (jika ditambah) | Media-specific, tidak utility |
+
+### 7.11.2 Aturan `@utility` Usage
+
+Gunakan `@utility` **hanya** untuk:
+1. Pola yang **benar-benar reusable** di seluruh design system (mis. `text-display-*`, `scrim-gradient`, `container`, `grid-lines`, `btn-hard`).
+2. Pola yang **tidak bergantung pada state JS** atau struktur DOM khusus.
+3. Pola yang **mengurangi duplikasi** signifikan di component.
+
+**Jangan** buat `@utility` untuk:
+- Pola yang hanya dipakai 1–2 kali.
+- Pola yang butuh arbitrary values berbeda tiap pemakaian.
+- Pola yang coupled ke JavaScript behavior.
+
+### 7.11.3 CSS Cascade & Coexistence Rules
+
+Selama migrasi bertahap:
+
+1. **Existing CSS dan Tailwind utilities coexist** — Urutannya: `@import "tailwindcss"` (base, components, utilities) → component `<style>` blocks (spesifik, override).
+2. **Selector specificity** — Component scoped styles (Astro) memiliki specificity lebih tinggi dari utility global. Hindari `!important` kecuali reduced motion.
+3. **Duplicate declarations** — Saat memigrasi pola, hapus CSS lama **hanya setelah** memverifikasi utility Tailwind menghasilkan computed style yang sama (cek DevTools).
+4. **Buildable state** — Setelah setiap batch migrasi, `npm run build` harus berhasil.
+5. **Visual parity check** — Bandingkan viewport 360px, 768px, 1024px, 1200px+ sebelum dan sesudah.
+
+---
+
 ## 8. Aturan gambar
 
 ### 8.1 Preview dan watermark
@@ -580,6 +802,56 @@ Usulan awal selaras dengan paket Lite, Standard, dan Plus. Keputusan final tetap
 - Ikon keranjang, mini-cart, badge jumlah item, dan layout toko yang bergantung pada checkout internal.
 - Pratinjau saat hover sebagai satu-satunya cara melihat foto pada tampilan daftar.
 - Komponen UI dekoratif yang tidak mendukung penemuan karya, pemahaman produk, atau pembelian.
+
+---
+
+## 16. Tailwind CSS v4 Implementation Notes
+
+### 16.1 Setup Saat Ini
+
+| Aspek | Implementasi |
+|---|---|
+| **Import** | `@import "tailwindcss";` di `src/styles/global.css` line 1 |
+| **Theme tokens** | `@theme` block di `global.css` lines 3–16 (hanya warna saat ini) |
+| **Preset switching** | CSS custom properties di `:root[data-theme-preset="bold"]` + `<html data-theme-preset={themePreset}>` di `BaseLayout.astro` |
+| **Vite plugin** | `@tailwindcss/vite` di `astro.config.mjs` line 22 |
+| **Config file** | Tidak ada `tailwind.config.js` (benar untuk v4) |
+| **Content detection** | Auto via Vite plugin (scan `.astro`, `.ts`, `.tsx`, `.js`, `.jsx`, `.html`) |
+| **CSS custom properties** | Digunakan untuk theme switching & compatibilitas v1 |
+
+### 16.2 Konvensi Project-Specific
+
+| Konvensi | Aturan |
+|---|---|
+| **Utility-first default** | Layout, spacing, typography, colors, borders, shadows, responsive, states → utility classes |
+| **`@theme` untuk design tokens** | Warna, spacing, typography clamp, breakpoints, shadows, transitions |
+| **`@utility` untuk reusable patterns** | `text-display-*`, `container`, `scrim-gradient`, `grid-lines`, `btn-hard` (Bold variant) |
+| **Component `<style>` untuk complex patterns** | Photo frame, lightbox, mosaic grid, header restructure, sticky CTA, WhatsApp float |
+| **CSS custom properties untuk theme switching** | `--color-brand`, `--color-bg`, `--color-grid-line` override via `data-theme-preset` |
+| **Arbitrary values allowed** | `clamp()`, custom widths, exact spacing, specialized gradients, animation values — gunakan `[value]` syntax |
+| **No `@apply`** | v4 tidak menganjurkan `@apply`; gunakan utility langsung di markup atau `@utility` |
+| **No `@layer`** | v4 tidak menggunakan `@layer base/components/utilities` |
+
+### 16.3 Class Detection & Dynamic Classes
+
+- Tailwind v4 mendeteksi class dari **source code statis** (template literals, string concatenation tidak dideteksi).
+- Pola dinamis yang ada: `.filter-btn--active`, `.header-nav-link--active`, `.featured-item--${i}`, `.gallery-item--${index}`.
+- **Aturan:** Class yang dibangun dinamis harus ditulis utuh di string template atau dipindahkan ke data-driven class maps. Contoh: `class={`filter-btn${isActive ? ' filter-btn--active' : ''}`}` → OK karena `filter-btn--active` utuh di source.
+- `hasPublicAsset()` helper tidak memengaruhi class detection.
+
+### 16.4 Verification Checklist Per Migration Batch
+
+- [ ] `npm run build` sukses
+- [ ] Visual parity: 360px, 768px, 1024px, 1200px+ (mobile, tablet, desktop, wide)
+- [ ] Responsive layout: grid columns, flex direction, container width, gutter
+- [ ] Typography: clamp values, line-height, letter-spacing, text-transform
+- [ ] Colors: both Editorial & Bold presets (toggle `data-theme-preset`)
+- [ ] Interactions: hover, focus-visible, active, disabled states
+- [ ] Animations: button hard shadow transform, WhatsApp float scale, transitions
+- [ ] Reduced motion: `prefers-reduced-motion: reduce` disables all
+- [ ] Accessibility: focus visible, skip link, aria attributes, heading hierarchy
+- [ ] No console errors, no layout shift (CLS)
+- [ ] Removed CSS verified no remaining consumers
 
 ---
 

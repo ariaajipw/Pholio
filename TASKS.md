@@ -35,7 +35,16 @@ Sebelum mengerjakan tugas, gunakan `PRD.md` untuk scope/kriteria penerimaan, `AR
 - [x] Sitemap dan Open Graph dasar.
 - [ ] Uji build dan deployment demo.
 
-### A4. Starter siap dipakai ulang
+### A4. Dokumentasi & Persiapan Migrasi Tailwind v4
+- [x] Audit read-only (Phase 1) — selesai, basis untuk dokumentasi.
+- [x] Dokumentasi preparation (Phase 2–6) — update `DESIGN.md`, `AGENTS.md`, `ARCHITECTURE.md`, `ASSET_GUIDE.md`, `TASKS.md` untuk alignment migrasi.
+- [ ] Tambahkan token spacing, typography, breakpoints, shadows, transitions ke `@theme` di `global.css` (DESIGN.md §3.3.4).
+- [ ] Klasifikasi CSS patterns: Migrate / Evaluate / Retain per komponen (DESIGN.md §7.11).
+- [ ] Verifikasi breakpoint mapping custom (xl: 1200px vs 1280px default) — dokumentasikan, jangan ubah sebelum implementasi.
+- [ ] Dokumentasikan theme ownership & sync rules (Editorial/Bold) — dua lapis token, jangan klaim single source of truth.
+- [ ] Catat open questions: M1 entrance motion, stack view, font loading, AVIF output, missing content fields (width/height, year, credit).
+
+### A5. Starter siap dipakai ulang
 - [ ] Jalankan QA mobile/desktop pada halaman representatif.
 - [ ] Perbaiki temuan kritis.
 - [ ] Buat petunjuk singkat mengubah konfigurasi, data, foto preview, dan link checkout.

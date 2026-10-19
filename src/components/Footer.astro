@@ -9,40 +9,40 @@ const { photographer, contact, social, navigation, name } = config;
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="footer" role="contentinfo">
-  <div class="container footer-inner">
+<footer class="footer bg-surface border-t border-border pt-12 pb-6 md:pt-16 md:pb-24 mt-auto" role="contentinfo">
+  <div class="container footer-inner grid gap-8 pb-8 md:gap-12 md:pb-12 md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] border-b border-border">
     <div class="footer-main">
       <div class="footer-brand">
-        <p class="footer-name">{photographer}</p>
-        <p class="footer-tagline">{name} — Portfolio Fotografi & Katalog</p>
+        <p class="font-bold uppercase tracking-[0.08em] mb-[0.5rem] text-muted m-0" style="font-size: clamp(1.25rem, 2vw, 1.5rem);">{photographer}</p>
+        <p class="text-muted m-0" style="font-size: 0.9375rem;">{name} — Portfolio Fotografi & Katalog</p>
       </div>
 
       <nav class="footer-nav" aria-label="Navigasi footer">
-        <ul role="list">
+        <ul class="list-none p-0 m-0 flex flex-col gap-[0.75rem]" role="list">
           {navigation.map((item) => (
             <li>
-              <a href={item.href}>{item.label}</a>
+              <a href={item.href} class="inline-flex items-center min-h-[44px] px-[0.5rem] -mx-[0.5rem] text-text no-underline transition-opacity duration-120 hover:opacity-60 hover:text-brand" style="font-size: 0.9375rem;">{item.label}</a>
             </li>
           ))}
         </ul>
       </nav>
 
       <div class="footer-contact">
-        <h2 class="footer-heading">Kontak</h2>
-        <address class="footer-address" style="font-style: normal;">
+        <h2 class="font-bold uppercase tracking-[0.08em] text-muted mb-[1rem] m-0" style="font-size: 0.8125rem;">Kontak</h2>
+        <address class="text-text leading-[1.8]" style="font-style: normal; font-size: 0.9375rem;">
           {contact.email && (
-            <p><a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+            <p><a href={`mailto:${contact.email}`} class="inline-flex items-center min-h-[44px] text-inherit no-underline transition-opacity duration-120 hover:opacity-60 hover:text-brand">{contact.email}</a></p>
           )}
           {contact.whatsapp && (
             <p>
-              <a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer">
+              <a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer" class="inline-flex items-center min-h-[44px] text-inherit no-underline transition-opacity duration-120 hover:opacity-60 hover:text-brand">
                 WhatsApp: {contact.whatsapp}
               </a>
             </p>
           )}
           {contact.instagram && (
             <p>
-              <a href={`https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer">
+              <a href={`https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" class="inline-flex items-center min-h-[44px] text-inherit no-underline transition-opacity duration-120 hover:opacity-60 hover:text-brand">
                 Instagram: {contact.instagram}
               </a>
             </p>
@@ -54,11 +54,11 @@ const currentYear = new Date().getFullYear();
       </div>
 
       <div class="footer-social">
-        <h2 class="footer-heading">Media Sosial</h2>
-        <ul class="footer-social-list" role="list">
+        <h2 class="font-bold uppercase tracking-[0.08em] text-muted mb-[1rem] m-0" style="font-size: 0.8125rem;">Media Sosial</h2>
+        <ul class="list-none p-0 m-0 flex flex-col gap-[0.75rem]" role="list">
           {social.map((item) => (
             <li>
-              <a href={item.url} target="_blank" rel="noopener noreferrer" aria-label={item.name}>
+              <a href={item.url} target="_blank" rel="noopener noreferrer" aria-label={item.name} class="flex items-center min-h-[44px] gap-[0.75rem] text-text no-underline transition-opacity duration-120 hover:opacity-60 hover:text-brand" style="font-size: 0.9375rem;">
                 {item.icon}
                 <span>{item.name}</span>
               </a>
@@ -66,7 +66,7 @@ const currentYear = new Date().getFullYear();
           ))}
           {social.length === 0 && contact.instagram && (
             <li>
-              <a href={`https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <a href={`https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="flex items-center min-h-[44px] gap-[0.75rem] text-text no-underline transition-opacity duration-120 hover:opacity-60 hover:text-brand" style="font-size: 0.9375rem;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
@@ -80,157 +80,11 @@ const currentYear = new Date().getFullYear();
       </div>
     </div>
 
-    <div class="footer-bottom">
-      <p class="footer-copyright">
-        &copy; {currentYear} {photographer}. Hak cipta dilindungi.
-      </p>
-    </div>
+
+  </div>
+  <div class="footer-bottom flex flex-col items-start gap-2 pt-8 mt-4 md:flex-row md:items-center md:justify-between md:gap-4">
+    <p class="m-0" style="font-size: 0.8125rem;">
+      &copy; {currentYear} {photographer}. Hak cipta dilindungi.
+    </p>
   </div>
 </footer>
-
-<style>
-  .footer {
-    background: var(--color-surface);
-    border-top: 1px solid var(--color-border);
-    /* Ruang bawah ekstra agar tombol WhatsApp melayang tidak menutupi
-       konten footer saat halaman digulir penuh (DESIGN §7.8) */
-    padding: 4rem 0 6rem;
-    margin-top: auto;
-  }
-
-  .footer-inner {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 3rem;
-    padding-bottom: 3rem;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .footer-name {
-    font-size: clamp(1.25rem, 2vw, 1.5rem);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin: 0 0 0.5rem;
-  }
-
-  .footer-tagline {
-    font-size: 0.9375rem;
-    color: var(--color-muted);
-    margin: 0;
-  }
-
-  .footer-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .footer-nav a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding-inline: 0.5rem;
-    margin-inline: -0.5rem;
-    color: var(--color-text);
-    text-decoration: none;
-    font-size: 0.9375rem;
-    transition: opacity 120ms;
-  }
-
-  .footer-nav a:hover {
-    opacity: 0.6;
-    color: var(--color-brand);
-  }
-
-  .footer-heading {
-    font-size: 0.8125rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-muted);
-    margin: 0 0 1rem;
-  }
-
-  .footer-address {
-    font-size: 0.9375rem;
-    line-height: 1.8;
-    color: var(--color-text);
-  }
-
-  .footer-address a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    color: inherit;
-    text-decoration: none;
-    transition: opacity 120ms;
-  }
-
-  .footer-address a:hover {
-    opacity: 0.6;
-    color: var(--color-brand);
-  }
-
-  .footer-social-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .footer-social-list a {
-    display: flex;
-    align-items: center;
-    min-height: 44px;
-    gap: 0.75rem;
-    color: var(--color-text);
-    text-decoration: none;
-    font-size: 0.9375rem;
-    transition: opacity 120ms;
-  }
-
-  .footer-social-list a:hover {
-    opacity: 0.6;
-    color: var(--color-brand);
-  }
-
-  .footer-bottom {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    padding-top: 2rem;
-    margin-top: 1rem;
-  }
-
-  .footer-copyright {
-    font-size: 0.8125rem;
-    color: var(--color-muted);
-    margin: 0;
-  }
-
-  @media (max-width: 767px) {
-    .footer {
-      padding: 3rem 0 1.5rem;
-    }
-
-    .footer-inner {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-      padding-bottom: 2rem;
-    }
-
-    .footer-bottom {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
-  }
-</style>
